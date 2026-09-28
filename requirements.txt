@@ -8,4 +8,3 @@ python-docx
 requests
 beautifulsoup4
 lxml
-[STRIPPED 80 bytes]
