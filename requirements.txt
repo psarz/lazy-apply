@@ -1,0 +1,10 @@
+streamlit
+pandas
+playwright
+python-dotenv
+jinja2
+reportlab
+python-docx
+requests
+beautifulsoup4
+lxml
