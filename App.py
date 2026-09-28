@@ -1,9 +1,11 @@
 import streamlit as st
-import json, pathlib, re, os
+import json, pathlib, re, os, sys
 import pandas as pd
 from collections import Counter
 import time, random, requests
 from bs4 import BeautifulSoup
+
+IS_CLOUD = os.path.exists("/mount/src") or os.path.exists("/home/appuser") or "STREAMLIT_CLOUD" in os.environ
 
 # --- CSV ---
 def parse_csv(path):
@@ -39,7 +41,6 @@ def extract_keywords(text):
     top=[w for w,_ in freq.most_common(20) if w not in found and len(w)>4]
     return list(dict.fromkeys(found+top))[:25]
 
-# --- AUTO JD SCRAPER (no syntax error) ---
 def scrape_job_description(job_url):
     headers={"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36","Referer":"https://www.linkedin.com/jobs/search"}
     try:
@@ -91,115 +92,50 @@ def get_default_resume_data():
         "title_line": "Senior Platform Engineer | Developer Experience | Cloud-Native Platforms | AI-Assisted Development",
         "location": "Bengaluru, India",
         "linkedin": "linkedin.com/in/psarz",
-        "summary": "Platform Engineering leader with 10+ years of experience architecting cloud platforms, Kubernetes ecosystems, CI/CD automation, and developer enablement solutions at enterprise scale. Deep expertise in AWS, Terraform, GitHub Enterprise, Internal Developer Platforms (IDPs), and AI-assisted development tooling.",
+        "summary": "Platform Engineering leader with 10+ years of experience architecting cloud platforms, Kubernetes ecosystems, CI/CD automation, and developer enablement solutions at enterprise scale.",
         "core_skills": [
             "Platforms & Infrastructure: AWS (EC2, ECS/EKS, Lambda, S3, IAM, CloudFormation, CDK), GCP, Kubernetes, Docker, Terraform",
             "CI/CD & DevOps: GitHub Enterprise Cloud, GitHub Actions, Azure DevOps, GitLab, Jenkins, Hosted Runners",
             "Developer Experience: Internal Developer Platforms (IDP), Backstage, Port, Self-Service Workflows, Service Catalogs",
-            "AI-Assisted Development: GitHub Copilot, Cursor IDE, Developer Agents, MCP (Model Context Protocol) Integrations",
+            "AI-Assisted Development: GitHub Copilot, Cursor IDE, Developer Agents, MCP Integrations",
             "Code Quality & Security: SonarQube, DevSecOps, CodeQL, Vulnerability Management, Container Security, Wiz",
             "Data & Analytics: Databricks, Power BI, Platform Telemetry, Developer Productivity Metrics",
             "Automation & Tooling: Python, Bash, ServiceNow Workflows, JFrog Artifactory, Atlassian Suite"
         ],
         "experiences": [
-            {"company":"S&P Global","role":"Senior Platform Enablement Engineer / Lead Platform Engineer","date":"March 2024 - Present","location":"Bengaluru, India (Hybrid)","bullets":[
-                "Design, implement, and maintain CI/CD pipelines across GitHub Enterprise Cloud, Azure DevOps, and GitHub Actions hosted runners ensuring reliable, fast, and secure software delivery.",
-                "Administer GitHub Enterprise Cloud including repository governance, branch policies, access controls, and enterprise configurations.",
-                "Own and operate AI-assisted development tooling including GitHub Copilot, Cursor IDE, developer agents, and MCP integrations - driving adoption and measuring productivity impact.",
-                "Build and extend Internal Developer Portal using Backstage and Port, creating self-service workflows, service catalogs, and golden paths.",
-                "Architect data pipelines and platform telemetry on Databricks, powering analytics on developer productivity and platform adoption.",
-                "Spearhead migrations from GitLab, Azure DevOps, and Jenkins to GitHub Enterprise with seamless developer onboarding.",
-                "Deliver comprehensive training on GitHub Actions, Copilot, Action Importer, and platform best practices.",
-                "Provision, secure, and optimize AWS services (EC2, ECS/EKS, Lambda, S3, IAM, CloudFormation/CDK) underpinning platform infrastructure."
-            ]},
-            {"company":"S&P Global (IHS Markit merged)","role":"Software Engineer III / Sr Software Configuration Management Developer","date":"February 2022 - February 2024","location":"","bullets":[
-                "Led platform engineering initiatives supporting enterprise development teams and cloud-native workloads.",
-                "Designed reusable cloud platform capabilities improving developer self-service and infrastructure consistency.",
-                "Drove CI/CD modernization, engineering standards, and delivery automation to improve release quality.",
-                "Partnered with security and architecture teams to implement secure-by-default cloud patterns."
-            ]},
-            {"company":"HCL Technologies","role":"Technical Lead","date":"June 2021 - February 2022","location":"Bengaluru, India","bullets":[
-                "Led technical delivery for DevOps and platform engineering initiatives for enterprise clients.",
-                "Designed and implemented CI/CD pipelines and automation frameworks.",
-                "Mentored junior engineers on cloud infrastructure, DevOps practices, and automation best practices."
-            ]},
-            {"company":"FIS","role":"Systems Programmer III","date":"February 2020 - May 2021","location":"Bengaluru, India","bullets":[
-                "Developed system-level automation and deployment pipelines for financial services applications.",
-                "Implemented infrastructure automation and configuration management solutions.",
-                "Ensured compliance with security and regulatory requirements in financial services environment."
-            ]},
-            {"company":"Capgemini","role":"AWS DevOps Consultant","date":"September 2018 - February 2020","location":"Bengaluru, India","bullets":[
-                "Delivered AWS cloud solutions and DevOps consulting services for enterprise clients.",
-                "Designed cloud infrastructure using AWS services (EC2, S3, Lambda, CloudFormation).",
-                "Built CI/CD pipelines and automation frameworks to accelerate software delivery."
-            ]},
-            {"company":"Wipro Limited","role":"Linux/Cloud Engineer","date":"June 2014 - August 2018","location":"Bengaluru, India","bullets":[
-                "Administered Linux environments (Red Hat, SLES, Ubuntu) for enterprise infrastructure.",
-                "Implemented AWS solutions using EC2, S3, Lambda, DynamoDB, OpsWorks, Elastic Beanstalk, and CloudFormation.",
-                "Developed automation scripts using Python and Bash for infrastructure provisioning.",
-                "Achieved AWS Developer and SysOps certifications, establishing cloud expertise foundation."
-            ]}
+            {"company":"S&P Global","role":"Senior Platform Enablement Engineer / Lead Platform Engineer","date":"March 2024 - Present","location":"Bengaluru, India (Hybrid)","bullets":["Design, implement, and maintain CI/CD pipelines across GitHub Enterprise Cloud, Azure DevOps, and GitHub Actions hosted runners","Administer GitHub Enterprise Cloud including repository governance, branch policies, access controls","Own and operate AI-assisted development tooling including GitHub Copilot, Cursor IDE, developer agents, and MCP integrations","Build and extend Internal Developer Portal using Backstage and Port, creating self-service workflows, service catalogs, and golden paths","Architect data pipelines and platform telemetry on Databricks","Spearhead migrations from GitLab, Azure DevOps, and Jenkins to GitHub Enterprise","Deliver comprehensive training on GitHub Actions, Copilot, Action Importer, and platform best practices","Provision, secure, and optimize AWS services (EC2, ECS/EKS, Lambda, S3, IAM, CloudFormation/CDK)"]},
+            {"company":"S&P Global (IHS Markit merged)","role":"Software Engineer III / Sr Software Configuration Management Developer","date":"February 2022 - February 2024","location":"","bullets":["Led platform engineering initiatives supporting enterprise development teams and cloud-native workloads","Designed reusable cloud platform capabilities improving developer self-service","Drove CI/CD modernization, engineering standards, and delivery automation","Partnered with security and architecture teams to implement secure-by-default cloud patterns"]},
+            {"company":"HCL Technologies","role":"Technical Lead","date":"June 2021 - February 2022","location":"Bengaluru, India","bullets":["Led technical delivery for DevOps and platform engineering initiatives","Designed and implemented CI/CD pipelines and automation frameworks","Mentored junior engineers on cloud infrastructure and DevOps practices"]},
+            {"company":"FIS","role":"Systems Programmer III","date":"February 2020 - May 2021","location":"Bengaluru, India","bullets":["Developed system-level automation and deployment pipelines for financial services applications","Implemented infrastructure automation and configuration management solutions","Ensured compliance with security and regulatory requirements"]},
+            {"company":"Capgemini","role":"AWS DevOps Consultant","date":"September 2018 - February 2020","location":"Bengaluru, India","bullets":["Delivered AWS cloud solutions and DevOps consulting services for enterprise clients","Designed cloud infrastructure using AWS services (EC2, S3, Lambda, CloudFormation)","Built CI/CD pipelines and automation frameworks"]},
+            {"company":"Wipro Limited","role":"Linux/Cloud Engineer","date":"June 2014 - August 2018","location":"Bengaluru, India","bullets":["Administered Linux environments (Red Hat, SLES, Ubuntu) for enterprise infrastructure","Implemented AWS solutions using EC2, S3, Lambda, DynamoDB, OpsWorks, Elastic Beanstalk, and CloudFormation","Developed automation scripts using Python and Bash","Achieved AWS Developer and SysOps certifications"]}
         ],
         "certifications": ["AWS Solutions Architect - Professional","Certified Kubernetes Administrator (CKA)","AWS Solutions Architect Associate","AWS Developer Associate","AI For Everyone","AWS DevOps Engineer - Professional","HashiCorp Terraform Associate","AWS SysOps Administrator Associate","Google Associate Cloud Engineer"],
-        "technical_expertise": {
-            "Cloud":"AWS (EC2, ECS, EKS, Lambda, S3, IAM, CloudFormation, CDK, DynamoDB), GCP",
-            "Containers":"Kubernetes, Docker, EKS, ECS",
-            "IaC":"Terraform, CloudFormation, CDK, Chef",
-            "CI/CD":"GitHub Actions, GitHub Enterprise, Azure DevOps, GitLab, Jenkins",
-            "Dev Platforms":"Backstage, Port, ServiceNow",
-            "AI Tools":"GitHub Copilot, Cursor IDE, MCP, Developer Agents",
-            "Security":"SonarQube, CodeQL, DevSecOps, Wiz",
-            "Languages":"Python, Bash",
-            "OS":"Linux (RHEL, SLES, Ubuntu), Unix, macOS"
-        },
+        "technical_expertise": {"Cloud":"AWS (EC2, ECS, EKS, Lambda, S3, IAM, CloudFormation, CDK), GCP","Containers":"Kubernetes, Docker, EKS, ECS","IaC":"Terraform, CloudFormation, CDK","CI/CD":"GitHub Actions, GitHub Enterprise, Azure DevOps, GitLab, Jenkins","Dev Platforms":"Backstage, Port, ServiceNow","AI Tools":"GitHub Copilot, Cursor IDE, MCP, Developer Agents","Security":"SonarQube, CodeQL, DevSecOps, Wiz","Languages":"Python, Bash","OS":"Linux (RHEL, SLES, Ubuntu), Unix, macOS"},
         "education":"The ICFAI University, Tripura - 2013 - 2016"
     }
 
 def parse_existing_resume(text):
     default=get_default_resume_data()
-    if not text or len(text)<200:
-        return {
-            "full_name":default["full_name"],"title_line":default["title_line"],
-            "summary":default["summary"],"core_skills":default["core_skills"],
-            "experiences_raw":default["experiences"],"certifications":default["certifications"],
-            "technical_expertise":default["technical_expertise"],"education":default["education"],"full_text":text or ""
-        }
-    return {
-        "full_name":default["full_name"],"title_line":default["title_line"],
-        "summary":default["summary"],"core_skills":default["core_skills"],
-        "experiences_raw":default["experiences"],"certifications":default["certifications"],
-        "technical_expertise":default["technical_expertise"],"education":default["education"],"full_text":text
-    }
+    return {"full_name":default["full_name"],"title_line":default["title_line"],"summary":default["summary"],"core_skills":default["core_skills"],"experiences_raw":default["experiences"],"certifications":default["certifications"],"technical_expertise":default["technical_expertise"],"education":default["education"],"full_text":text or ""}
 
 def tailor_resume(profile,job,existing_parsed=None):
     jd=(job.get("description","")+" "+job.get("responsibilities",""))[:6000]
     keywords=extract_keywords(jd)
     default_data=get_default_resume_data()
     source_exps=existing_parsed.get("experiences_raw") if existing_parsed and existing_parsed.get("experiences_raw") else default_data["experiences"]
-    # FIX: No company name in summary
     top_kw=", ".join(keywords[:7])
+    # FIX: No target company in summary
     tailored_summary=f"Platform Engineering leader with 10+ years architecting cloud platforms, Kubernetes ecosystems, CI/CD automation, and IDPs at enterprise scale. Deep expertise in {top_kw}. Proven track record improving deployment velocity and enabling scalable developer experiences."
-
     tailored_exp=[]
     for exp in source_exps:
         bullets=exp.get("bullets",[])
         scored=[(sum(1 for k in keywords if k.lower() in b.lower()),b) for b in bullets]
         scored.sort(key=lambda x: x[0], reverse=True)
-        tailored_exp.append({
-            "company":exp.get("company",""),
-            "role":exp.get("role",""),
-            "date":exp.get("date",""),
-            "location":exp.get("location",""),
-            "bullets":[b for _,b in scored]
-        })
+        tailored_exp.append({"company":exp.get("company",""),"role":exp.get("role",""),"date":exp.get("date",""),"location":exp.get("location",""),"bullets":[b for _,b in scored]})
     resume_text=" ".join([b for e in tailored_exp for b in e.get("bullets",[])]) + " " + tailored_summary
     score=int(sum(1 for k in keywords if k.lower() in resume_text.lower())/max(len(keywords),1)*100)
-    return {
-        "keywords":keywords,"ats_score":score,"summary":tailored_summary,"experience":tailored_exp,
-        "full_name":default_data["full_name"],"title_line":default_data["title_line"],
-        "core_skills":default_data["core_skills"],"certifications":default_data["certifications"],
-        "technical_expertise":default_data["technical_expertise"],"education":default_data["education"]
-    }
+    return {"keywords":keywords,"ats_score":score,"summary":tailored_summary,"experience":tailored_exp,"full_name":default_data["full_name"],"title_line":default_data["title_line"],"core_skills":default_data["core_skills"],"certifications":default_data["certifications"],"technical_expertise":default_data["technical_expertise"],"education":default_data["education"]}
 
 def make_pdf_faang(profile,tailored,out_path):
     from reportlab.lib.pagesizes import letter
@@ -210,26 +146,22 @@ def make_pdf_faang(profile,tailored,out_path):
     from reportlab.lib.units import inch
     doc=SimpleDocTemplate(out_path,pagesize=letter,leftMargin=0.6*inch,rightMargin=0.6*inch,topMargin=0.5*inch,bottomMargin=0.5*inch)
     styles=getSampleStyleSheet()
-    title=ParagraphStyle('TitleFAANG',parent=styles['Title'],fontSize=14,leading=16,alignment=TA_CENTER,fontName='Helvetica-Bold',spaceAfter=1)
+    title=ParagraphStyle('Title',parent=styles['Title'],fontSize=14,leading=16,alignment=TA_CENTER,fontName='Helvetica-Bold',spaceAfter=1)
     subtitle=ParagraphStyle('Subtitle',parent=styles['Normal'],fontSize=9,leading=11,alignment=TA_CENTER,fontName='Helvetica',spaceAfter=2)
     section=ParagraphStyle('Section',parent=styles['Heading2'],fontSize=10,leading=12,spaceBefore=10,spaceAfter=3,fontName='Helvetica-Bold',textColor=colors.HexColor("#0F172A"))
-    normal=ParagraphStyle('NormalFAANG',parent=styles['Normal'],fontSize=8.5,leading=11,fontName='Helvetica',spaceAfter=2)
+    normal=ParagraphStyle('Normal',parent=styles['Normal'],fontSize=8.5,leading=11,fontName='Helvetica',spaceAfter=2)
     bullet=ParagraphStyle('Bullet',parent=styles['Normal'],fontSize=8.5,leading=11,leftIndent=12,spaceAfter=1.5,fontName='Helvetica')
     job_title=ParagraphStyle('JobTitle',parent=styles['Normal'],fontSize=9,leading=11,spaceBefore=7,spaceAfter=0.5,fontName='Helvetica-Bold')
     job_meta=ParagraphStyle('JobMeta',parent=styles['Normal'],fontSize=8,leading=10,spaceAfter=2,fontName='Helvetica-Oblique',textColor=colors.HexColor("#475569"))
     skill_label=ParagraphStyle('SkillLabel',parent=styles['Normal'],fontSize=8.5,leading=11,fontName='Helvetica-Bold')
-
     story=[]
     story.append(Paragraph(tailored.get("full_name","BHANU PRATAP SINGH BHADAURIA"),title))
-    story.append(Paragraph(tailored.get("title_line","Senior Platform Engineer | Developer Experience | Cloud-Native Platforms"),subtitle))
-    contact_line=f"{profile.get('location','Bengaluru, India')} - LinkedIn: {profile.get('linkedin','linkedin.com/in/psarz')}"
-    story.append(Paragraph(contact_line,subtitle))
+    story.append(Paragraph(tailored.get("title_line","Senior Platform Engineer"),subtitle))
+    story.append(Paragraph(f"{profile.get('location','Bengaluru, India')} - LinkedIn: {profile.get('linkedin','linkedin.com/in/psarz')}",subtitle))
     story.append(HRFlowable(width="100%",thickness=0.8,color=colors.HexColor("#0F172A"),spaceAfter=6,spaceBefore=4))
-
     story.append(Paragraph("PROFESSIONAL SUMMARY",section))
     story.append(Paragraph(tailored.get("summary","")[:1200],normal))
     story.append(Spacer(1,4))
-
     story.append(Paragraph("CORE SKILLS",section))
     for skill_line in tailored.get("core_skills",[]):
         if ":" in skill_line:
@@ -238,30 +170,22 @@ def make_pdf_faang(profile,tailored,out_path):
         else:
             story.append(Paragraph(skill_line,normal))
     story.append(Spacer(1,4))
-
     story.append(Paragraph("PROFESSIONAL EXPERIENCE",section))
     for exp in tailored.get("experience",[]):
-        company=exp.get("company","")
-        role=exp.get("role","")
-        date=exp.get("date","")
-        loc=exp.get("location","")
-        if company:
-            story.append(Paragraph(f"<b>{company}</b>",job_title))
-        if role:
-            story.append(Paragraph(f"<i>{role}</i>",job_meta))
-        meta_text=""
-        if date and loc:
-            meta_text=f"{date} - {loc}"
-        elif date:
-            meta_text=date
-        elif loc:
-            meta_text=loc
-        if meta_text:
-            story.append(Paragraph(meta_text,job_meta))
+        if exp.get("company"):
+            story.append(Paragraph(f"<b>{exp.get('company')}</b>",job_title))
+        if exp.get("role"):
+            story.append(Paragraph(f"<i>{exp.get('role')}</i>",job_meta))
+        meta=""
+        if exp.get("date") and exp.get("location"):
+            meta=f"{exp.get('date')} - {exp.get('location')}"
+        elif exp.get("date"):
+            meta=exp.get("date")
+        if meta:
+            story.append(Paragraph(meta,job_meta))
         for b in exp.get("bullets",[]):
             b_clean=b[:300].replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
             story.append(Paragraph(f"• {b_clean}",bullet))
-
     story.append(Paragraph("CERTIFICATIONS",section))
     certs=tailored.get("certifications",[])
     if certs:
@@ -274,9 +198,8 @@ def make_pdf_faang(profile,tailored,out_path):
             right=f"• {col2[i]}" if i < len(col2) else ""
             cert_data.append([Paragraph(left,normal), Paragraph(right,normal)])
         t=Table(cert_data,colWidths=[3.2*inch,3.2*inch])
-        t.setStyle(TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),0),('RIGHTPADDING',(0,0),(-1,-1),6)]))
+        t.setStyle(TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),0)]))
         story.append(t)
-
     story.append(Paragraph("TECHNICAL EXPERTISE",section))
     tech=tailored.get("technical_expertise",{})
     tech_data=[]
@@ -284,12 +207,10 @@ def make_pdf_faang(profile,tailored,out_path):
         tech_data.append([Paragraph(f"<b>{k}:</b>",skill_label), Paragraph(v,normal)])
     if tech_data:
         t2=Table(tech_data,colWidths=[1.0*inch,5.4*inch])
-        t2.setStyle(TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),0),('BOTTOMPADDING',(0,0),(-1,-1),2)]))
+        t2.setStyle(TableStyle([('VALIGN',(0,0),(-1,-1),'TOP')]))
         story.append(t2)
-
     story.append(Paragraph("EDUCATION",section))
     story.append(Paragraph(tailored.get("education","The ICFAI University, Tripura - 2013 - 2016"),normal))
-
     doc.build(story)
     return out_path
 
@@ -365,9 +286,12 @@ else:
 
 verify_before=st.sidebar.toggle("Verify before Apply",value=True)
 st.title("🚀 AutoApply v3 - FAANG Fixed | No Company in Summary | All Exp + Certs")
-st.caption("Fixed: No syntax error, Summary has NO target company, Includes ALL 6 experiences + 9 certs")
+if IS_CLOUD:
+    st.warning("Running on Streamlit Cloud - Auto-Apply uses manual mode (Playwright browsers not installed). Tailor & download resume, then apply manually via link.")
+else:
+    st.caption("Local mode - Playwright available for auto-apply")
 
-tab0,tab1,tab2,tab3=st.tabs(["0. Fetch Latest","1. Import CSV","2. Tailor (FAANG Fixed)","3. Auto-Apply"])
+tab0,tab1,tab2,tab3=st.tabs(["0. Fetch Latest","1. Import CSV","2. Tailor (FAANG Fixed)","3. Apply"])
 if "jobs" not in st.session_state:
     st.session_state.jobs=[]
 if "tailored" not in st.session_state:
@@ -431,7 +355,7 @@ with tab1:
             st.rerun()
 
 with tab2:
-    st.info("FIXED: Summary does NOT contain target company. Includes ALL 6 experiences + 9 certs + CORE SKILLS grouping + TECHNICAL EXPERTISE. No syntax error.")
+    st.info("FIXED: Summary has NO target company. Includes ALL 6 experiences (S&P Global, HCL, FIS, Capgemini, Wipro) + 9 certs + CORE SKILLS + TECHNICAL EXPERTISE.")
     if not st.session_state.jobs:
         st.warning("Fetch or import first")
     else:
@@ -465,19 +389,19 @@ with tab2:
                 job['description']=desc
                 st.session_state.jobs[idx]=job
                 st.success("Saved")
-            if st.button("Tailor Resume (FAANG Fixed - No Company in Summary, All Exp + Certs)",type="primary",use_container_width=True):
+            if st.button("Tailor Resume (FAANG Fixed)",type="primary",use_container_width=True):
                 tailored=tailor_resume(profile,job,existing_parsed=existing_parsed)
                 st.session_state.tailored[job['id']]=tailored
                 out=BASE/f"resumes/tailored_{job['id']}_FIXED.pdf"
                 out.parent.mkdir(exist_ok=True)
                 make_pdf_faang(profile,tailored,str(out))
-                st.success(f"✅ FIXED Resume Ready! ATS {tailored['ats_score']}% | {len(tailored.get('experience',[]))} exps, {len(tailored.get('certifications',[]))} certs")
+                st.success(f"✅ FIXED Resume Ready! ATS {tailored['ats_score']}% | {len(tailored.get('experience',[]))} exps")
         with c2:
             tailored=st.session_state.tailored.get(job['id'])
             if tailored:
                 st.metric("ATS",f"{tailored['ats_score']}%")
                 st.write("Keywords:",", ".join(tailored['keywords'][:12]))
-                st.text_area("Summary (NO company name - FIXED)",value=tailored['summary'],height=120)
+                st.text_area("Summary (NO company name)",value=tailored['summary'],height=120)
                 exp_count=len(tailored.get('experience',[]))
                 cert_count=len(tailored.get('certifications',[]) or [])
                 st.write(f"Experiences: {exp_count} (All) | Certifications: {cert_count} (All)")
@@ -490,33 +414,49 @@ with tab2:
                 st.info("Click Tailor")
 
 with tab3:
-    dry=st.toggle("Dry Run",value=verify_before)
-    headless=st.toggle("Headless",value=False)
-    for j in st.session_state.jobs:
-        tailored=st.session_state.tailored.get(j['id'])
-        if not tailored:
-            continue
-        verified=st.session_state.get(f"verify_{j['id']}",False) or not verify_before
-        with st.expander(f"{j['company']} - {j['role']} | ATS {tailored['ats_score']}% | Verified {verified}"):
-            st.write(j['job_url'])
-            if st.button(f"Apply {j['id']}",key=f"apply_{j['id']}"):
-                if not verified:
-                    st.error("Verify first")
-                else:
-                    try:
-                        import asyncio
-                        from playwright.async_api import async_playwright
-                        async def run():
-                            async with async_playwright() as p:
-                                b=await p.chromium.launch(headless=headless)
-                                pg=await b.new_page()
-                                await pg.goto(j['job_url'],timeout=60000)
-                                await pg.wait_for_timeout(2000)
-                                (BASE/"output").mkdir(exist_ok=True)
-                                await pg.screenshot(path=str(BASE/f"output/preview_{j['id']}.png"),full_page=True)
-                                await b.close()
-                        asyncio.run(run())
-                        st.success("Screenshot saved")
-                        st.image(str(BASE/f"output/preview_{j['id']}.png"))
-                    except Exception as e:
-                        st.error(f"{e}")
+    st.subheader("Apply")
+    if IS_CLOUD:
+        st.info("Streamlit Cloud detected - Playwright browsers not available. Use manual apply mode below.")
+        for j in st.session_state.jobs:
+            tailored=st.session_state.tailored.get(j['id'])
+            if not tailored:
+                continue
+            with st.expander(f"{j['company']} - {j['role']} | ATS {tailored['ats_score']}%"):
+                st.write(f"**Job URL:** {j['job_url']}")
+                st.link_button(f"Open Job & Apply Manually", j['job_url'])
+                pdf_path=BASE/f"resumes/tailored_{j['id']}_FIXED.pdf"
+                if pdf_path.exists():
+                    with open(pdf_path,"rb") as f:
+                        st.download_button(f"Download Resume for {j['company']}",f,file_name=pdf_path.name,key=f"dl_{j['id']}")
+    else:
+        dry=st.toggle("Dry Run",value=verify_before)
+        headless=st.toggle("Headless",value=False)
+        for j in st.session_state.jobs:
+            tailored=st.session_state.tailored.get(j['id'])
+            if not tailored:
+                continue
+            verified=st.session_state.get(f"verify_{j['id']}",False) or not verify_before
+            with st.expander(f"{j['company']} - {j['role']} | ATS {tailored['ats_score']}% | Verified {verified}"):
+                st.write(j['job_url'])
+                if st.button(f"Apply {j['id']}",key=f"apply_{j['id']}"):
+                    if not verified:
+                        st.error("Verify first")
+                    else:
+                        try:
+                            import asyncio
+                            from playwright.async_api import async_playwright
+                            async def run():
+                                async with async_playwright() as p:
+                                    b=await p.chromium.launch(headless=headless)
+                                    pg=await b.new_page()
+                                    await pg.goto(j['job_url'],timeout=60000)
+                                    await pg.wait_for_timeout(2000)
+                                    (BASE/"output").mkdir(exist_ok=True)
+                                    await pg.screenshot(path=str(BASE/f"output/preview_{j['id']}.png"),full_page=True)
+                                    await b.close()
+                            asyncio.run(run())
+                            st.success("Screenshot saved")
+                            st.image(str(BASE/f"output/preview_{j['id']}.png"))
+                        except Exception as e:
+                            st.error(f"Apply error: {e} - run locally: playwright install chromium")
+                            st.info("On Streamlit Cloud, browsers are not installed. Use manual apply link above.")

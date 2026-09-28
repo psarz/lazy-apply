@@ -1,0 +1,7 @@
+libnss3
+libnspr4
+libatk1.0-0
+libatk-bridge2.0-0
+[STRIPPED 88 bytes]-1.0-0
+libcairo2
+libasound2
