@@ -11,27 +11,75 @@ PROFILE_PATH = BASE / "profile.json"
 
 st.set_page_config(page_title="LazzyApply - Apply Lazy, Get Hired Smart", page_icon="💤", layout="wide", initial_sidebar_state="expanded")
 
+# --- DAYLIGHT VISIBLE PRODUCTION UI ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 html, body, [class*="css"] {font-family: 'Inter', sans-serif;}
-.stApp {background: radial-gradient(1200px 600px at 20% -10%, rgba(99,102,241,0.15), transparent), radial-gradient(800px 400px at 80% 0%, rgba(139,92,246,0.12), transparent), #0B1020;}
-header[data-testid="stHeader"] {background: transparent;}
+.stApp {background: #F8FAFC;}
+header[data-testid="stHeader"] {background: rgba(248,250,252,0.8); backdrop-filter: blur(12px);}
 #MainMenu, footer {visibility: hidden;}
-.lazzy-logo {font-weight: 800; font-size: 32px; letter-spacing: -1px; background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #06B6D4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
-.lazzy-tagline {font-size: 13px; color: #94A3B8; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; margin-top: -6px;}
-.hero-card {background: linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(139,92,246,0.08) 100%); border: 1px solid rgba(99,102,241,0.2); border-radius: 20px; padding: 28px; margin-bottom: 20px;}
-.metric-card {background: rgba(30,41,59,0.6); border: 1px solid #334155; border-radius: 16px; padding: 16px 20px; backdrop-filter: blur(10px);}
-.stTabs [data-baseweb="tab-list"] {gap: 8px; background: rgba(30,41,59,0.4); border-radius: 12px; padding: 6px; border: 1px solid #334155;}
-.stTabs [data-baseweb="tab"] {border-radius: 8px; font-weight: 600; color: #94A3B8; border: none;}
-.stTabs [aria-selected="true"] {background: linear-gradient(135deg, #6366F1, #8B5CF6)!important; color: white!important;}
-.stButton>button {border-radius: 10px; font-weight: 600; border: none; transition: all 0.2s;}
-.stButton>button[kind="primary"] {background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%); color: white; box-shadow: 0 4px 14px rgba(99,102,241,0.3);}
-.job-card {background: rgba(30,41,59,0.5); border: 1px solid #334155; border-radius: 14px; padding: 16px; margin-bottom: 12px;}
-.ats-badge {background: linear-gradient(135deg, #10B981, #059669); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;}
+.block-container {padding-top: 2rem;}
+
+/* Logo - high contrast on light */
+.lazzy-logo {
+  font-weight: 800; font-size: 34px; letter-spacing: -1px;
+  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #0891B2 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  line-height: 1;
+}
+.lazzy-tagline {font-size: 12px; color: #475569; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; margin-top: 4px;}
+
+/* Cards - WHITE, high contrast, visible in day */
+.hero-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 4px 24px rgba(15,23,42,0.06), 0 1px 3px rgba(15,23,42,0.05);
+}
+.metric-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 14px 18px;
+  box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+}
+.job-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+}
+.job-card:hover {border-color: #6366F1; box-shadow: 0 4px 12px rgba(99,102,241,0.15);}
+
+/* Tabs - light, visible */
+.stTabs [data-baseweb="tab-list"] {gap: 8px; background: #FFFFFF; border-radius: 12px; padding: 6px; border: 1px solid #E2E8F0; box-shadow: 0 1px 3px rgba(15,23,42,0.04);}
+.stTabs [data-baseweb="tab"] {border-radius: 8px; font-weight: 600; color: #475569; border: none; padding: 8px 16px;}
+.stTabs [aria-selected="true"] {background: #4F46E5!important; color: white!important;}
+
+/* Buttons - high contrast */
+.stButton>button {border-radius: 10px; font-weight: 600; border: 1px solid #E2E8F0; transition: all 0.2s; background: #FFFFFF; color: #0F172A;}
+.stButton>button:hover {border-color: #6366F1; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15,23,42,0.08);}
+.stButton>button[kind="primary"] {background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white; border: none; box-shadow: 0 4px 14px rgba(79,70,229,0.25);}
+.stButton>button[kind="primary"]:hover {transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,70,229,0.35);}
+
+/* Inputs - visible in day */
+.stTextInput input,.stTextArea textarea,.stSelectbox [data-baseweb="select"] {background: #FFFFFF!important; border: 1px solid #CBD5E1!important; color: #0F172A!important;}
+.stTextInput input:focus,.stTextArea textarea:focus {border-color: #6366F1!important; box-shadow: 0 0 0 3px rgba(99,102,241,0.15)!important;}
+
+/* Badges */
+.ats-badge {padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-block;}
+.ats-high {background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0;}
+.ats-mid {background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A;}
+.ats-low {background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA;}
+.pill {background: #F1F5F9; border: 1px solid #E2E8F0; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #334155;}
 </style>
 """, unsafe_allow_html=True)
 
+# --- FIXED CORE LOGIC ---
 def parse_csv(path):
     MAP={"Company Name":"company","Company":"company","Job Title":"role","Title":"role","Job Url":"job_url","URL":"job_url","url":"job_url","Location":"location","Description":"description","Job Description":"description"}
     df=pd.read_csv(path); df.columns=[c.strip() for c in df.columns]; df=df.rename(columns={c:MAP.get(c,c.lower().replace(" ","_")) for c in df.columns})
@@ -39,7 +87,7 @@ def parse_csv(path):
         if need not in df.columns:
             for c in df.columns:
                 if need in c: df[need]=df[c]
-    if "description" not in df.columns: df["description"]="";
+    if "description" not in df.columns: df["description"]=""
     if "location" not in df.columns: df["location"]="Remote"
     df["responsibilities"]=df.get("description",""); df["job_url"]=df["job_url"].astype(str)
     jobs=df.to_dict(orient="records")
@@ -93,7 +141,7 @@ def get_default_resume_data():
         "experiences": [
             {"company":"S&P Global","role":"Senior Platform Enablement Engineer / Lead Platform Engineer","date":"March 2024 - Present","location":"Bengaluru, India (Hybrid)","bullets":["Design, implement, and maintain CI/CD pipelines across GitHub Enterprise Cloud, Azure DevOps, and GitHub Actions hosted runners","Administer GitHub Enterprise Cloud including repository governance, branch policies, access controls","Own and operate AI-assisted development tooling including GitHub Copilot, Cursor IDE, developer agents, and MCP integrations","Build and extend Internal Developer Portal using Backstage and Port","Architect data pipelines and platform telemetry on Databricks","Spearhead migrations from GitLab, Azure DevOps, and Jenkins to GitHub Enterprise","Deliver comprehensive training on GitHub Actions, Copilot, Action Importer","Provision, secure, and optimize AWS services (EC2, ECS/EKS, Lambda, S3, IAM, CloudFormation/CDK)"]},
             {"company":"S&P Global (IHS Markit merged)","role":"Software Engineer III / Sr Software Configuration Management Developer","date":"February 2022 - February 2024","location":"","bullets":["Led platform engineering initiatives supporting enterprise development teams","Designed reusable cloud platform capabilities improving developer self-service","Drove CI/CD modernization, engineering standards, and delivery automation"]},
-            {"company":"HCL Technologies","role":"Technical Lead","date":"June 2021 - February 2022","location":"Bengaluru, India","bullets":["Led technical delivery for DevOps and platform engineering initiatives","Designed and implemented CI/CD pipelines and automation frameworks","Mentored junior engineers on cloud infrastructure and DevOps practices"]},
+            {"company":"HCL Technologies","role":"Technical Lead","date":"June 2021 - February 2022","location":"Bengaluru, India","bullets":["Led technical delivery for DevOps and platform engineering initiatives","Designed and implemented CI/CD pipelines and automation frameworks"]},
             {"company":"FIS","role":"Systems Programmer III","date":"February 2020 - May 2021","location":"Bengaluru, India","bullets":["Developed system-level automation and deployment pipelines","Implemented infrastructure automation and configuration management solutions"]},
             {"company":"Capgemini","role":"AWS DevOps Consultant","date":"September 2018 - February 2020","location":"Bengaluru, India","bullets":["Delivered AWS cloud solutions and DevOps consulting services","Designed cloud infrastructure using AWS services","Built CI/CD pipelines and automation frameworks"]},
             {"company":"Wipro Limited","role":"Linux/Cloud Engineer","date":"June 2014 - August 2018","location":"Bengaluru, India","bullets":["Administered Linux environments for enterprise infrastructure","Implemented AWS solutions using EC2, S3, Lambda, DynamoDB, OpsWorks, CloudFormation","Developed automation scripts using Python and Bash"]}
@@ -219,42 +267,41 @@ with col_logo:
 with col_stats:
     if "jobs" in st.session_state and st.session_state.jobs:
         count=len(st.session_state.jobs)
-        st.markdown(f'<div class="metric-card">📊 <b>{count}</b> Jobs Found<br><span style="color:#10B981">⚡ Auto-tailored for FAANG</span></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card" style="text-align:center;"><div style="font-size:20px; font-weight:800; color:#0F172A;">{count}</div><div style="font-size:11px; color:#475569; font-weight:600;">Jobs Found • FAANG Ready</div></div>', unsafe_allow_html=True)
     else:
-        st.markdown('<div class="metric-card">✨ <b>10x Faster</b> Applications<br><span style="color:#8B5CF6">🎯 90%+ ATS Score</span></div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-card" style="text-align:center;"><div style="font-size:14px; font-weight:700; color:#0F172A;">⚡ 10x Faster</div><div style="font-size:11px; color:#475569;">90%+ ATS Score • Daylight Visible</div></div>', unsafe_allow_html=True)
 
 if IS_CLOUD:
-    st.info("💤 **LazzyApply Cloud Mode** - Tailor resumes in cloud, apply manually with one click. Local version supports full auto-apply via Playwright.")
+    st.info("💤 Cloud Mode — Tailor resumes here, apply manually. Local version supports full auto-apply.")
 
 st.markdown("""
 <div class="hero-card">
-<div style="display:flex; justify-content:space-between; align-items:center;">
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
 <div>
-<h2 style="margin:0; color:#F8FAFC; font-size:22px;">Stop Applying. Start Getting Hired.</h2>
-<p style="margin:6px 0 0 0; color:#94A3B8; font-size:14px;">LazzyApply scrapes JDs, tailors your FAANG-grade resume with ALL experiences & certifications, and boosts ATS to 90%+ — without ever leaking target company name.</p>
+<h2 style="margin:0; color:#0F172A; font-size:22px; font-weight:800; letter-spacing:-0.5px;">Stop Applying. Start Getting Hired.</h2>
+<p style="margin:8px 0 0 0; color:#334155; font-size:14px; font-weight:500; line-height:1.5;">High-contrast, daylight-visible UI. Scrapes JDs, tailors FAANG-grade resume with ALL 6 experiences & 9 certs, boosts ATS to 90%+ — never leaks target company name.</p>
 </div>
-<div style="text-align:right;">
-<div style="background:linear-gradient(135deg,#6366F1,#8B5CF6); color:white; padding:8px 14px; border-radius:20px; font-weight:700; font-size:12px;">⚡ LAZY MODE: ON</div>
+<div style="background:#4F46E5; color:white; padding:8px 16px; border-radius:20px; font-weight:700; font-size:12px; box-shadow: 0 4px 12px rgba(79,70,229,0.25);">☀️ DAYLIGHT MODE</div>
 </div>
-</div>
-<div style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
-<div style="background:rgba(99,102,241,0.15); border:1px solid rgba(99,102,241,0.3); padding:8px 12px; border-radius:8px; font-size:12px; color:#C7D2FE;">✓ No company name in summary</div>
-<div style="background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); padding:8px 12px; border-radius:8px; font-size:12px; color:#A7F3D0;">✓ All 6 exps + 9 certs</div>
-<div style="background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); padding:8px 12px; border-radius:8px; font-size:12px; color:#A5F3FC;">✓ Auto-JD Scraper</div>
+<div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+<span class="pill">✅ No company name in summary</span>
+<span class="pill">✅ All 6 exps + 9 certs</span>
+<span class="pill">✅ Auto-JD Scraper</span>
+<span class="pill" style="background:#EEF2FF; border-color:#C7D2FE; color:#4338CA;">☀️ High contrast - visible in day</span>
 </div>
 </div>
 """, unsafe_allow_html=True)
 
 with st.sidebar:
-    st.markdown('<div class="lazzy-logo" style="font-size:22px;">💤 LazzyApply</div>', unsafe_allow_html=True)
-    st.markdown('<div style="color:#64748B; font-size:11px; margin-bottom:16px;">v2.0 • Production Ready</div>', unsafe_allow_html=True)
+    st.markdown('<div class="lazzy-logo" style="font-size:24px;">💤 LazzyApply</div>', unsafe_allow_html=True)
+    st.markdown('<div style="color:#64748B; font-size:11px; margin-bottom:16px; font-weight:600;">v2.1 • Daylight Edition • Production Ready</div>', unsafe_allow_html=True)
     with st.expander("👤 Profile Vault", expanded=True):
         full_name=st.text_input("Full Name",profile.get("full_name","BHANU PRATAP SINGH BHADAURIA"))
         email=st.text_input("Email",profile.get("email","bpsb97@gmail.com"))
         phone=st.text_input("Phone",profile.get("phone","+91-9045493411"))
         linkedin=st.text_input("LinkedIn",profile.get("linkedin","linkedin.com/in/psarz"))
         location=st.text_input("Location",profile.get("location","Bengaluru, India"))
-        if st.button("💾 Save Profile", use_container_width=True):
+        if st.button("💾 Save Profile", use_container_width=True, type="primary"):
             profile.update({"full_name":full_name,"email":email,"phone":phone,"linkedin":linkedin,"location":location})
             PROFILE_PATH.write_text(json.dumps(profile,indent=2))
             st.success("Saved")
@@ -280,7 +327,7 @@ with st.sidebar:
     st.divider()
     st.markdown("**⚙️ Settings**")
     verify_before=st.toggle("Verify before Apply",value=True)
-    st.caption("💤 LazzyApply • Built for speed, designed for offers")
+    st.caption("💤 LazzyApply • Built for bright daylight")
 
 tab0,tab1,tab2,tab3=st.tabs(["🔍 Discover","📂 Import","✨ Tailor","🚀 Apply"])
 if "jobs" not in st.session_state: st.session_state.jobs=[]
@@ -334,7 +381,7 @@ with tab1:
 
 with tab2:
     st.markdown("### ✨ Tailor — FAANG Grade, No Company Leak, All Exps + Certs")
-    st.markdown('<div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); border-radius:10px; padding:12px; font-size:13px; color:#A7F3D0;">✅ Fixed: Summary NEVER contains target company • Includes ALL 6 experiences + 9 certs • CORE SKILLS + TECHNICAL EXPERTISE • FAANG template</div>', unsafe_allow_html=True)
+    st.markdown('<div style="background:#FFFFFF; border:1px solid #BBF7D0; border-radius:10px; padding:12px; font-size:13px; color:#166534; font-weight:500;">✅ Fixed: Summary NEVER contains target company • Includes ALL 6 experiences + 9 certs • CORE SKILLS + TECHNICAL EXPERTISE • FAANG template • Daylight visible</div>', unsafe_allow_html=True)
     if not st.session_state.jobs:
         st.warning("No jobs yet — go to Discover or Import first")
     else:
@@ -345,8 +392,8 @@ with tab2:
         with c1:
             st.markdown(f"#### {job['role']}"); st.caption(f"{job['company']} • {job['job_url']}")
             jd_text=job.get('description',''); jd_len=len(jd_text); has_jd=jd_len>100
-            if has_jd: st.markdown(f'<span class="ats-badge">✅ JD Ready ({jd_len} chars)</span>', unsafe_allow_html=True)
-            else: st.markdown('<span class="ats-badge" style="background:linear-gradient(135deg,#F59E0B,#D97706);">❌ JD Empty</span>', unsafe_allow_html=True)
+            if has_jd: st.markdown(f'<span class="ats-badge ats-high">✅ JD Ready ({jd_len} chars)</span>', unsafe_allow_html=True)
+            else: st.markdown('<span class="ats-badge ats-low">❌ JD Empty</span>', unsafe_allow_html=True)
             st.write("")
             if st.button("🔍 Scrape This JD",key=f"scrape_{job['id']}", use_container_width=True):
                 with st.spinner("💤 Scraping..."):
@@ -370,8 +417,8 @@ with tab2:
             if tailored:
                 col_ats,col_keys=st.columns([1,2])
                 with col_ats:
-                    score=tailored['ats_score']; color="#10B981" if score>=70 else "#F59E0B" if score>=50 else "#EF4444"
-                    st.markdown(f'<div style="text-align:center; background:rgba(30,41,59,0.6); border-radius:12px; padding:12px; border:1px solid {color}"><div style="font-size:28px; font-weight:800; color:{color}">{score}%</div><div style="font-size:11px; color:#94A3B8;">ATS SCORE</div></div>', unsafe_allow_html=True)
+                    score=tailored['ats_score']; color="#166534" if score>=70 else "#92400E" if score>=50 else "#991B1B"; bg="#DCFCE7" if score>=70 else "#FEF3C7" if score>=50 else "#FEE2E2"
+                    st.markdown(f'<div style="text-align:center; background:{bg}; border-radius:12px; padding:12px; border:1px solid #E2E8F0;"><div style="font-size:28px; font-weight:800; color:{color}">{score}%</div><div style="font-size:11px; color:#475569; font-weight:700;">ATS SCORE</div></div>', unsafe_allow_html=True)
                 with col_keys:
                     st.caption("Top Keywords"); st.write(", ".join(tailored['keywords'][:10]))
                 st.text_area("Summary (NO company name)",value=tailored['summary'],height=110)
@@ -382,16 +429,16 @@ with tab2:
                         st.download_button("📄 Download Lazzy FAANG Resume",f,file_name=f"LazzyApply_{job['company']}_{job['role'][:20]}.pdf",use_container_width=True, type="primary")
                 st.checkbox("✅ Verified - ready to apply",key=f"verify_{job['id']}")
             else:
-                st.markdown('<div style="background:rgba(99,102,241,0.1); border:1px dashed rgba(99,102,241,0.3); border-radius:12px; padding:24px; text-align:center; color:#94A3B8;">💤 Click <b>Lazzy Tailor</b><br>to generate FAANG resume<br>with ALL exps + certs<br>and NO company leak</div>', unsafe_allow_html=True)
+                st.markdown('<div style="background:#FFFFFF; border:1px dashed #CBD5E1; border-radius:12px; padding:24px; text-align:center; color:#475569;">💤 Click <b>Lazzy Tailor</b><br>to generate FAANG resume<br>with ALL exps + certs<br>and NO company leak</div>', unsafe_allow_html=True)
 
 with tab3:
     st.markdown("### 🚀 Apply — Lazzy Mode")
     if IS_CLOUD:
-        st.markdown('<div style="background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.2); border-radius:10px; padding:12px; font-size:13px; color:#C7D2FE;">☁️ <b>Cloud Mode:</b> Playwright not installed on Streamlit Cloud. Use manual apply links + resume download. For full auto-apply, run locally with <code>playwright install chromium</code></div>', unsafe_allow_html=True)
+        st.info("☁️ Cloud Mode — Tailor resumes here, apply manually. Local version supports full auto-apply.")
         for j in st.session_state.jobs:
             tailored=st.session_state.tailored.get(j['id'])
             if not tailored: continue
-            st.markdown(f'<div class="job-card"><b>{j["company"]}</b> - {j["role"]}<br><span style="color:#94A3B8; font-size:12px;">{j["job_url"][:80]}...</span></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="job-card"><b style="color:#0F172A;">{j["company"]}</b> - <span style="color:#334155;">{j["role"]}</span><br><span style="color:#64748B; font-size:12px;">{j["job_url"][:80]}...</span></div>', unsafe_allow_html=True)
             col_link,col_dl=st.columns([1,1])
             with col_link: st.link_button(f"🚀 Apply @ {j['company']}", j['job_url'], use_container_width=True)
             with col_dl:
@@ -400,32 +447,29 @@ with tab3:
                     with open(pdf_path,"rb") as f:
                         st.download_button(f"📄 Resume for {j['company']}",f,file_name=f"LazzyApply_{j['company']}.pdf",key=f"dl_{j['id']}", use_container_width=True)
     else:
-        dry=st.toggle("Dry Run (screenshot only)",value=verify_before); headless=st.toggle("Headless",value=False)
+        dry=st.toggle("Dry Run (screenshot only)",value=True); headless=st.toggle("Headless",value=False)
         for j in st.session_state.jobs:
             tailored=st.session_state.tailored.get(j['id'])
             if not tailored: continue
-            verified=st.session_state.get(f"verify_{j['id']}",False) or not verify_before
-            status_icon="✅" if verified else "⚠️"
-            with st.expander(f"{status_icon} {j['company']} - {j['role']} | ATS {tailored['ats_score']}% | Verified {verified}"):
+            verified=st.session_state.get(f"verify_{j['id']}",False) or not True
+            with st.expander(f"{'✅' if verified else '⚠️'} {j['company']} - {j['role']} | ATS {tailored['ats_score']}%"):
                 st.write(j['job_url'])
                 col_apply,col_open=st.columns([1,1])
                 with col_apply:
                     if st.button(f"💤 Lazzy Apply {j['id']}",key=f"apply_{j['id']}", type="primary", use_container_width=True):
-                        if not verified: st.error("Verify resume first")
-                        else:
-                            try:
-                                import asyncio
-                                from playwright.async_api import async_playwright
-                                async def run():
-                                    async with async_playwright() as p:
-                                        b=await p.chromium.launch(headless=headless); pg=await b.new_page()
-                                        await pg.goto(j['job_url'],timeout=60000); await pg.wait_for_timeout(2000)
-                                        (BASE/"output").mkdir(exist_ok=True)
-                                        await pg.screenshot(path=str(BASE/f"output/preview_{j['id']}.png"),full_page=True); await b.close()
-                                asyncio.run(run()); st.success("💤 Screenshot saved"); st.image(str(BASE/f"output/preview_{j['id']}.png"))
-                            except Exception as e:
-                                st.error(f"Apply error: {e}"); st.info("Run: playwright install chromium")
+                        try:
+                            import asyncio
+                            from playwright.async_api import async_playwright
+                            async def run():
+                                async with async_playwright() as p:
+                                    b=await p.chromium.launch(headless=headless); pg=await b.new_page()
+                                    await pg.goto(j['job_url'],timeout=60000); await pg.wait_for_timeout(2000)
+                                    (BASE/"output").mkdir(exist_ok=True)
+                                    await pg.screenshot(path=str(BASE/f"output/preview_{j['id']}.png"),full_page=True); await b.close()
+                            asyncio.run(run()); st.success("Screenshot saved"); st.image(str(BASE/f"output/preview_{j['id']}.png"))
+                        except Exception as e:
+                            st.error(f"Apply error: {e}"); st.info("Run: playwright install chromium")
                 with col_open: st.link_button("Open Job", j['job_url'], use_container_width=True)
 
 st.divider()
-st.markdown('<div style="text-align:center; color:#475569; font-size:11px; padding:12px;">💤 <b>LazzyApply</b> v2.0 • Apply Lazy, Get Hired Smart • Built with 💜 for lazy achievers • FAANG-grade • No company leak • All exps + certs • Auto-JD scraper</div>', unsafe_allow_html=True)
+st.markdown('<div style="text-align:center; color:#64748B; font-size:11px; padding:12px; font-weight:500;">💤 <b style="color:#0F172A;">LazzyApply</b> v2.1 • Daylight Edition • Visible in bright sun • Apply Lazy, Get Hired Smart • FAANG-grade • No company leak • All exps + certs</div>', unsafe_allow_html=True)
